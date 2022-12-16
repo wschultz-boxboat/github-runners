@@ -1,0 +1,33 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: azure-cli-runner
+  namespace: github-runners
+spec:
+  template:
+    spec:
+      ephemeral: true
+      image: someregistry.azurecr.io/azure-cli-runner:azure-cli-v2.42.0
+      imagePullPolicy: Always
+      labels:
+      - azure-cli
+      organization: some-org
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: azure-cli-runner-autoscaler
+  namespace: github-runners
+spec:
+  scaleDownDelaySecondsAfterScaleOut: 300
+  scaleTargetRef:
+    kind: RunnerDeployment
+    name: azure-cli-runner
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: PercentageRunnersBusy
+    scaleUpThreshold: '0.70'
+    scaleDownThreshold: '0.25'
+    scaleUpFactor: '2'
+    scaleDownFactor: '0.5'

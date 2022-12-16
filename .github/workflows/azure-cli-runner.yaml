@@ -1,0 +1,53 @@
+name: Build and Push Azure CLI Custom GitHub Runner
+
+on:
+  #  push:
+  #    branches:
+  #    - main
+  #    paths:
+  #    - "azure-cli/**"
+  #    - ".github/workflows/azure-cli-runner.yaml"
+  #    - "!azure-cli/README.md"
+  #  pull_request:
+  #    branches:
+  #    - main
+  #    paths:
+  #    - "azure-cli/**"
+  #    - ".github/workflows/azure-cli-runner.yaml"
+  #    - "!azure-cli/README.md"
+  workflow_dispatch:
+
+env:
+  IMAGE_REGISTRY_URL: someregistry.azurecr.io
+  GIT_COMMIT_SHA: ${{ github.sha }}
+  SUBSCRIPTION_ID: "some-subscription-id"
+  TENANT_ID: "some-subscription-id"
+
+jobs:
+  build-and-push-image:
+    runs-on: [self-hosted, azure-cli]
+    defaults:
+      run:
+        shell: bash
+        working-directory: azure-cli
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Image
+        run: |
+          make build
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: '{"clientId":"${{ secrets.POC_CLIENT_ID }}","clientSecret":"${{ secrets.POC_CLIENT_SECRET }}","subscriptionId":"${{ env.SUBSCRIPTION_ID }}","tenantId":"${{ env.TENANT_ID }}"}'
+
+      - name: Login to ACR
+        run: |
+          az acr login --name ${{ env.IMAGE_REGISTRY_URL }}
+
+      - name: Push Image
+        if: github.event_name != 'pull_request'
+        run: |
+          make push
