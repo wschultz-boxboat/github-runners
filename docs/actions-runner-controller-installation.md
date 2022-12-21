@@ -2,6 +2,7 @@
 The actions runner controller is a project adopted by GitHub for managing self-hosted runners at scale on Kubernetes. The actions runner controller will include the Custom Resource Definitions (CRDs) for creating self-hosted runner deployments along with other resources that a team/organization may find useful.
 
 # Pre-Requesites
+* A Kubernetes cluster
 * Access to install a GitHub App
 * [Kubectl](https://kubernetes.io/docs/tasks/tools/) installed locally
 * [Helm](https://helm.sh/docs/helm/helm_install/) installed locally
